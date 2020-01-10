@@ -30,14 +30,17 @@ public:
 		glm::mat4 VP = camera.GetViewProjection();
 		glm::mat4 M = GetModel();
 
-		return VP * M; //camera.GetViewProjection() * GetModel();
+		// Camera.GetViewProjection() * GetModel();
+		return VP * M;
 	}
 
-	inline glm::vec3* GetPos() { return &pos; } //getters
+	// Position, rotation and scale getters
+	inline glm::vec3* GetPos() { return &pos; }
 	inline glm::vec3* GetRot() { return &rot; }
 	inline glm::vec3* GetScale() { return &scale; }
 
-	inline void SetPos(glm::vec3& pos) { this->pos = pos; } // setters
+	// Position, rotation and scale setters
+	inline void SetPos(glm::vec3& pos) { this->pos = pos; }
 	inline void SetRot(glm::vec3& rot) { this->rot = rot; }
 	inline void SetScale(glm::vec3& scale) { this->scale = scale; }
 protected:

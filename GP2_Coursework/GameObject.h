@@ -2,7 +2,6 @@
 #include "Texture.h"
 #include "transform.h"
 #include "Shader.h"
-#include "stb_image.h"
 #include <cassert>
 #include <GL\glew.h>
 #include <string>
@@ -13,18 +12,17 @@
 
 using namespace std;
 
+// Gameobject class created for easier access to each objects mesh, texture and transform.
 class GameObject
 {
 public:
 	GameObject();
 	~GameObject();
 	
-	void LoadModel(const std::string& filename);
-	void LoadTexture(const std::string& filename);
-	void LoadShader(const std::string& filename);
+	void LoadModel(const string& fileName);
+	void LoadTexture(const string& fileName);
 
 	Mesh mesh;
 	Texture texture;
-	Shader shader;
 	Transform transform;
 };

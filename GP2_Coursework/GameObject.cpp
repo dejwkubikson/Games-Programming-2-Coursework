@@ -10,23 +10,17 @@ GameObject::~GameObject()
 	mesh.~Mesh();
 	// Deleting texture
 	texture.~Texture();
-	// Deleting shader
-	shader.~Shader();
 }
 
-void GameObject::LoadModel(const std::string& filename)
+void GameObject::LoadModel(const string& fileName)
 {
-	mesh.loadModel(filename);
-}
-
-
-void GameObject::LoadTexture(const std::string& filename)
-{
-	texture.Initialize(filename);
+	// Loading model through Mesh class
+	mesh.loadModel(fileName);
 }
 
 
-void GameObject::LoadShader(const std::string& filename)
+void GameObject::LoadTexture(const string& fileName)
 {
-	shader.Initialize(filename);
+	// Loading texture through Texture class
+	texture.Initialize(fileName);
 }

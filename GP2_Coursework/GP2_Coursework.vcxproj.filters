@@ -16,9 +16,6 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stb_image.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -26,6 +23,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stb_image.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,9 +48,6 @@
     <ClInclude Include="obj_loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -58,6 +61,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -81,8 +93,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="monkey3.obj">
+    <Object Include="..\res\barrier.obj">
       <Filter>Resource Files</Filter>
     </Object>
+    <Object Include="..\res\crate.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
+    <Object Include="..\res\container.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
+    <Object Include="..\res\plastic_crate.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\res\wood_texture.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\barrier_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\metal_texture.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\plastic_texture.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

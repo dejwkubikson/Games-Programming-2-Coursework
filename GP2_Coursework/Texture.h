@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <GL\glew.h>
+#include <cassert>
+#include <iostream>
 
 class Texture
 {
@@ -8,7 +10,7 @@ public:
 	Texture();
 	void Initialize(const std::string& fileName);
 
-	void Bind(unsigned int unit); // bind upto 32 textures
+	void Bind(unsigned int unit);
 
 	~Texture();
 

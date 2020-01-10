@@ -1,20 +1,18 @@
 #pragma once
 #include "MainGame.h"
-#include <iostream>
-#include <string>
 
 MainGame::MainGame()
 {
+	// Locking the mouse in the centre of the screen
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	// Setting the game state to play
 	_gameState = GameState::PLAY;
-	Display* _gameDisplay = new Display(); //new display
-	/*Mesh* mesh();
-	Texture* texture();
+	// Creating new display
+	Display* _gameDisplay = new Display();
+	// Creating new shader, audio device and skybox
 	Shader* shader();
-	Transform* transform();*/
-
-	//GameObject* monkey();
-
-	counter = 0.0f;
+	Audio* audioDevice();
+	Skybox* skybox();
 }
 
 MainGame::~MainGame()
@@ -29,103 +27,166 @@ void MainGame::run()
 
 void MainGame::initSystems()
 {
+	// Initializing all components
 	_gameDisplay.initDisplay(); 
 
-	/*mesh.loadModel("..\\res\\monkey3.obj");
-	texture.Initialize("..\\res\\bricks.jpg");
-	shader.Initialize("..\\res\\shader");*/
+	// Objects
+	crate.LoadModel("..\\res\\crate.obj");
+	crate.LoadTexture("..\\res\\wood_texture.jpg");
+	// Mesh sphere can only be set once. It doesn't have to in the game loop because the objects aren't moving
+	crate.mesh.updateSphereData(glm::vec3(5, -3, 20), 3);
 
-	monkey.LoadModel("..\\res\\monkey3.obj");
-	monkey.LoadTexture("..\\res\\bricks.jpg");
-	monkey.LoadShader("..\\res\\shader");
+	plasticBox.LoadModel("..\\res\\plastic_crate.obj");
+	plasticBox.LoadTexture("..\\res\\plastic_texture.jpg");
+	plasticBox.mesh.updateSphereData(glm::vec3(-5, -8, 20), 3);
 
-	monkey2.LoadModel("..\\res\\monkey3.obj");
-	monkey2.LoadTexture("..\\res\\Water.jpg");
-	monkey2.LoadShader("..\\res\\shader");
+	barrier.LoadModel("..\\res\\barrier.obj");
+	barrier.LoadTexture("..\\res\\barrier_texture.jpg");
+	barrier.mesh.updateSphereData(glm::vec3(0, -6, 10), 3);
 
+	// Shader
+	shader.Initialize("..\\res\\shader");
+
+	// Skybox
+	skybox.initSkyBox();
+
+	// Camera
 	myCamera.initCamera(glm::vec3(0, 0, -5), 70.0f, (float)_gameDisplay.getScreenWidth() / _gameDisplay.getScreenHeight(), 0.01f, 1000.0f);
 
-	counter = 0.0f;
-}
-
-void MainGame::gameLoop()
-{
-	while (_gameState != GameState::EXIT)
-	{
-		processInput();
-		drawGame();
-	}
+	// Audio
+	bgMusic = audioDevice.loadSound("..\\res\\bg_music.wav");
+	collisionSound = audioDevice.loadSound("..\\res\\collision_sound.wav");
 }
 
 void MainGame::processInput()
 {
 	SDL_Event evnt;
 
-	while(SDL_PollEvent(&evnt)) //get and process events
+	// Get and process events
+	while (SDL_PollEvent(&evnt))
 	{
 		switch (evnt.type)
 		{
-			case SDL_KEYDOWN:
-				if (evnt.key.keysym.sym == SDLK_w)
-					myCamera.MoveForward(0.2f);
+		case SDL_KEYDOWN:
+			// The player can use W, A, S and D keys to move around
+			if (evnt.key.keysym.sym == SDLK_w)
+				myCamera.MoveForward(0.2f);
 
-				if (evnt.key.keysym.sym == SDLK_d)
-					myCamera.MoveRight(-0.2f);
+			if (evnt.key.keysym.sym == SDLK_d)
+				myCamera.MoveRight(-0.2f);
 
-				if (evnt.key.keysym.sym == SDLK_s)
-					myCamera.MoveForward(-0.2f);
+			if (evnt.key.keysym.sym == SDLK_s)
+				myCamera.MoveForward(-0.2f);
 
-				if (evnt.key.keysym.sym == SDLK_a)
-					myCamera.MoveRight(0.2f);
+			if (evnt.key.keysym.sym == SDLK_a)
+				myCamera.MoveRight(0.2f);
 
-				if (evnt.key.keysym.sym == SDLK_e)
-					myCamera.RotateY(-0.1f);
+			// On 'ESC' press exiting the game
+			if (evnt.key.keysym.sym == SDLK_ESCAPE)
+				_gameState = GameState::EXIT;
 
-				if (evnt.key.keysym.sym == SDLK_q)
-					myCamera.RotateY(0.1f);
 			break;
 
-			case SDL_MOUSEMOTION:
-				myCamera.SetXViewProjection(evnt.motion.xrel);
-				myCamera.SetYViewProjection(evnt.motion.yrel);
-				break;
+		case SDL_MOUSEMOTION:
+			// Using mouse motion to rotate the camera
+			myCamera.RotateY(evnt.motion.yrel * 0.003f);
+			myCamera.RotateX(-evnt.motion.xrel * 0.003f);
+			break;
 
-			case SDL_QUIT:
-				_gameState = GameState::EXIT;
-				break;
+		case SDL_QUIT:
+			_gameState = GameState::EXIT;
+			break;
 		}
+	}
+}
+
+void MainGame::gameLoop()
+{
+	while (_gameState != GameState::EXIT)
+	{
+		// Processing input first
+		processInput();
+
+		// Play background music
+		playAudio(bgMusic, glm::vec3(0.0f, 0.0f, 0.0f));
+
+		// Drawing the game
+		drawGame();
+
+		// Checking for collisions
+		if (collision(myCamera.collider.getSpherePos(), myCamera.collider.getSphereRadius(), barrier.mesh.getSpherePos(), barrier.mesh.getSphereRadius()))
+			cout << "Collided with a barrier! " << endl;
+		if (collision(myCamera.collider.getSpherePos(), myCamera.collider.getSphereRadius(), plasticBox.mesh.getSpherePos(), plasticBox.mesh.getSphereRadius()))
+			cout << "Collided with a plastic box! " << endl;
+		if (collision(myCamera.collider.getSpherePos(), myCamera.collider.getSphereRadius(), crate.mesh.getSpherePos(), crate.mesh.getSphereRadius()))
+			cout << "Collided with a crate! " << endl;
+	}
+}
+
+bool MainGame::collision(glm::vec3 m1Pos, float m1Rad, glm::vec3 m2Pos, float m2Rad)
+{
+	// Calculating the distance difference from two spheres
+	float distance = glm::sqrt((m2Pos.x - m1Pos.x) * (m2Pos.x - m1Pos.x) + (m2Pos.y - m1Pos.y) * (m2Pos.y - m1Pos.y) + (m2Pos.z - m1Pos.z) * (m2Pos.z - m1Pos.z));
+
+	// If the distance is less than sum of two radiuses then a collision occured
+	if (distance < (m1Rad + m2Rad))
+	{
+		// Playing sound on collision
+		audioDevice.setlistener(myCamera.getPos(), m1Pos);
+		playAudio(collisionSound, m1Pos);
+		return true;
+	}
+	else
+		return false;
+}
+
+void MainGame::playAudio(unsigned int Source, glm::vec3 pos)
+{
+	ALint state;
+	alGetSourcei(Source, AL_SOURCE_STATE, &state);
+	if (AL_PLAYING != state)
+	{
+		audioDevice.playSound(Source, pos);
 	}
 }
 
 void MainGame::drawGame()
 {
+	// Clearing the display
 	_gameDisplay.clearDisplay(0.0f, 0.0f, 0.0f, 1.0f);
 
-	/*transform.SetPos(glm::vec3(sinf(counter), 0.0f, 0.0f));
-	transform.SetRot(glm::vec3(0.0f, 180, 0.0f));
-	//transform.SetScale(glm::vec3(sinf(counter), sinf(counter), sinf(counter)));
+	// Displaying fog and light
+	_gameDisplay.displayFog();
+	_gameDisplay.displayLight();
 
+	// Drawing skybox
+	skybox.drawSkyBox(1200);
+
+	// Binding the shader
 	shader.Bind();
-	shader.Update(transform, myCamera);
-	texture.Bind(0);
+	{
+		// Drawing each object
+		crate.transform.SetPos(glm::vec3(5, -3, 20));
+		crate.transform.SetRot(glm::vec3(0, 0.5f, 0));
+		crate.transform.SetScale(glm::vec3(2, 2, 2));
+		shader.Update(crate.transform, myCamera);
+		crate.texture.Bind(0);
+		crate.mesh.draw();
 
-	mesh.draw();*/
+		plasticBox.transform.SetPos(glm::vec3(-5, -8, 20));
+		plasticBox.transform.SetRot(glm::vec3(4.6f, 0, 0.5f));
+		plasticBox.transform.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		shader.Update(plasticBox.transform, myCamera);
+		plasticBox.texture.Bind(0);
+		plasticBox.mesh.draw();
 
-	monkey.transform.SetPos(glm::vec3(sinf(counter), 0.0f, 0.0f));
-	monkey.transform.SetRot(glm::vec3(0.0f, 180, 0.0f));
-	monkey.shader.Bind();
-	monkey.shader.Update(monkey.transform, myCamera);
-	monkey.texture.Bind(0);
-	monkey.mesh.draw();
-
-	monkey2.transform.SetPos(glm::vec3(sinf(counter), 0.0f, 5.0f));
-	monkey2.transform.SetRot(glm::vec3(0.0f, 180, 0.0f));
-	monkey2.shader.Bind();
-	monkey2.shader.Update(monkey2.transform, myCamera);
-	monkey2.texture.Bind(0);
-	monkey2.mesh.draw();
-
-	counter += 0.01f;
+		barrier.transform.SetPos(glm::vec3(0, -6, 10));
+		barrier.transform.SetRot(glm::vec3(0.0f, 0, 0.0f));
+		barrier.transform.SetScale(glm::vec3(0.04f, 0.04f, 0.04f));
+		shader.Update(barrier.transform, myCamera);
+		barrier.texture.Bind(0);
+		barrier.mesh.draw();
+	}
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnd();
